@@ -4,6 +4,9 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\User;
+use App\Models\Product;
+use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
@@ -14,6 +17,14 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        // \App\Models\User::factory(10)->create();
+        //DB::statement('SET FOREIGN_KEY_CHECKS = 0');
+        
+        //empty tables
+         Product::truncate(); User::truncate();   
+        
+        //populate tables
+        $this->call([UserSeeder::class, ProductSeeder::class]);
+
+        //DB::statement('SET FOREIGN_KEY_CHECKS = 1');
     }
 }
