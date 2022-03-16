@@ -23,7 +23,8 @@ use App\Http\Controllers\ProductController;
 //authentication
 
 Route::post('/register', [AuthController::class, 'register']);
-Route::post('/logout', [AuthController::class, 'logout']);
+Route::post('/login', [AuthController::class, 'login']);
+
 
 //products
 Route::get('products/search/{name}', [ProductController::class, 'search']);
@@ -32,6 +33,7 @@ Route::resource('products', ProductController::class)->except(['store', 'update'
 //protected routes
 Route::group(['middleware'=>['auth:sanctum']], function (){
     Route::resource('/products', ProductController::class)->except(['index', 'show']);
+    Route::post('/logout', [AuthController::class, 'logout']);
  });
 
 // Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
