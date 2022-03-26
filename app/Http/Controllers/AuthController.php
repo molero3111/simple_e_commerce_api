@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RegisterRequest;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Iluminate\Http\Response;
@@ -9,14 +11,9 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    public function register(Request $request)
+    public function register(RegisterRequest $request)
     {
-
-        $fields = $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|string|unique:users,email',
-            'password' => 'required|string|confirmed'
-        ]);
+        $fields = $request->validated();
 
         $user = User::create([
             'name' => $fields['name'], 'email' => $fields['email'],
@@ -28,34 +25,30 @@ class AuthController extends Controller
             'token' => $user->createToken('token_user_' . $user->id)->plainTextToken
         ];
 
+        $fields = $user = null;
+
         return response($response, 201);
     }
 
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
-
-        $fields = $request->validate([
-            'email' => 'required|string|unique:users,email',
-            'password' => 'required|string|confirmed'
-        ]);
-
-        //CHECK EMAIL
+        // return $request;
+        // return $request->all();
+        $fields = $request->validated();
+        // $fields = $request->all();
+        //get user by EMAIL
         $user = User::where('email', $fields['email'])->first();
 
-        if (!$user) {
+        if (!Hash::check($fields['password'], $user->password)) {
             return response(
-                ['message' => 'Your E-Mail address was not found.'],
-                401
+                [
+                    'message' => 'Incorrect password.',
+                    'errors' => [
+                        'password' => 'The password was not foud.'
+                    ]
+                ]
             );
         }
-        if (!Hash::check($fields['password'], $user->password)){
-            return response(
-                ['message' => 'Incorrect password.'],
-                401
-            );
-        }
-
-
 
         $response = [
             'user' => $user,

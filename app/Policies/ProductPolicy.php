@@ -5,6 +5,7 @@ namespace App\Policies;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Auth\Access\Response;
 
 class ProductPolicy
 {
@@ -41,7 +42,7 @@ class ProductPolicy
      */
     public function create(User $user)
     {
-        //
+        return $user->role == 2 || $user->role == 3;
     }
 
     /**
@@ -53,7 +54,8 @@ class ProductPolicy
      */
     public function update(User $user, Product $product)
     {
-        //
+        return $user->role == 2 || $user->role == 3;
+        
     }
 
     /**
@@ -65,7 +67,7 @@ class ProductPolicy
      */
     public function delete(User $user, Product $product)
     {
-        //
+        return $user->role == 3;
     }
 
     /**

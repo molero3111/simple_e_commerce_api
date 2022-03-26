@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
+use \Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
@@ -27,9 +30,13 @@ class ProductController extends Controller
     public function store(StoreProductRequest $request)
     {
         $request->validate([
-            'name'=>'required', 'slug'=>'required',
-            'price'=>'required', 'stock'=>'required',
+            'name' => 'required', 'slug' => 'required',
+            'price' => 'required', 'stock' => 'required',
         ]);
+
+        if ($request->user()->cannot('create', Product::class)) {
+            return ['type' => 'error', 'message' => 'You are not authorized to create new products.'];
+        }
 
         return Product::create($request->all());
     }
@@ -54,17 +61,24 @@ class ProductController extends Controller
      */
     public function update(UpdateProductRequest $request, Product $product)
     {
+        if ($request->user()->cannot('update', $product)) {
+            return ['type' => 'error', 'message' => 'You are not authorized to update products.'];
+        }
         return Product::find($product->id)->update($request->all());
     }
 
     /**
      * Remove the specified resource from storage.
      *
+     * 
      * @param  \App\Models\Product  $product
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Product $product)
+    public function destroy(Request $request, Product $product)
     {
+        if ($request->user()->cannot('delete', $product)) {
+            return ['type' => 'error', 'message' => 'You are not authorized to delete products.'];
+        }
         return Product::destroy($product->id);
     }
 
@@ -76,6 +90,6 @@ class ProductController extends Controller
      */
     public function search(String $name)
     {
-        return Product::where('name', 'like', "%".$name."%")->get();
+        return Product::where('name', 'like', "%" . $name . "%")->get();
     }
 }
